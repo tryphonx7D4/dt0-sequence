@@ -142,7 +142,7 @@ namespace dt0
 	#endif
 		___constexpr20___ sequence_allocator() noexcept = default;
 
-		~sequence_allocator() noexcept = default;
+		___constexpr20___ ~sequence_allocator() noexcept = default;
 
 	#ifdef _WIN64
 		___constexpr20___ void set_heap()
@@ -333,33 +333,33 @@ namespace dt0
 		iterator_core _core{ nullptr, nullptr };
 
 	public:
-		sequence_iterator() noexcept = default;
+		___constexpr20___ sequence_iterator() noexcept = default;
 
-		sequence_iterator(std::nullptr_t) noexcept
+		___constexpr20___ sequence_iterator(std::nullptr_t) noexcept
 		{
 			_core._modules_iterator = nullptr;
 			_core._values_iterator = nullptr;
 		}
 
-		sequence_iterator(module_pointer const current_module, value_pointer const current_value) noexcept
+		___constexpr20___ sequence_iterator(module_pointer const current_module, value_pointer const current_value) noexcept
 		{
 			_core._modules_iterator = current_module;
 			_core._values_iterator = current_value;
 		}
 
-		sequence_iterator(const sequence_iterator& other) noexcept
+		___constexpr20___ sequence_iterator(const sequence_iterator& other) noexcept
 		{
 			_core._modules_iterator = other.current_module();
 			_core._values_iterator = other.current_value();
 		}
 
-		sequence_iterator(sequence_iterator&& other) noexcept
+		___constexpr20___ sequence_iterator(sequence_iterator&& other) noexcept
 		{
 			_core._modules_iterator = other.current_module();
 			_core._values_iterator = other.current_value();
 		}
 
-		~sequence_iterator() noexcept = default;
+		___constexpr20___ ~sequence_iterator() noexcept = default;
 
 		___nodiscard___ ___constexpr20___ module_pointer const current_module() const
 		{
