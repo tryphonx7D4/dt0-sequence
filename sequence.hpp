@@ -175,7 +175,7 @@ namespace dt0
 			}
 		}
 
-		void free_heap()
+		___constexpr20___ void free_heap()
 		{
 			if (_heap == nullptr)
 			{
@@ -401,7 +401,7 @@ namespace dt0
 			return (_core._modules_iterator->_begin - 1);
 		}
 
-		const sequence_iterator& operator= (std::nullptr_t) noexcept
+		___constexpr20___ const sequence_iterator& operator= (std::nullptr_t) noexcept
 		{
 			_core._modules_iterator = nullptr;
 			_core._values_iterator = nullptr;
@@ -409,7 +409,7 @@ namespace dt0
 			return *this;
 		}
 
-		const sequence_iterator& operator= (const sequence_iterator& other) noexcept
+		___constexpr20___ const sequence_iterator& operator= (const sequence_iterator& other) noexcept
 		{
 			_core._modules_iterator = other.current_module();
 			_core._values_iterator = other.current_value();
@@ -417,7 +417,7 @@ namespace dt0
 			return *this;
 		}
 
-		const sequence_iterator& operator= (sequence_iterator&& other) noexcept
+		___constexpr20___ const sequence_iterator& operator= (sequence_iterator&& other) noexcept
 		{
 			_core._modules_iterator = other.current_module();
 			_core._values_iterator = other.current_value();
@@ -440,7 +440,7 @@ namespace dt0
 			return *_core._values_iterator;
 		}
 
-		const sequence_iterator& operator++ ()
+		___constexpr20___ const sequence_iterator& operator++ ()
 		{
 			++_core._values_iterator;
 
@@ -456,7 +456,7 @@ namespace dt0
 			return *this;
 		}
 
-		const sequence_iterator& operator-- ()
+		___constexpr20___ const sequence_iterator& operator-- ()
 		{
 			--_core._values_iterator;
 
@@ -472,7 +472,7 @@ namespace dt0
 			return *this;
 		}
 
-		sequence_iterator operator++ (int)
+		___constexpr20___ sequence_iterator operator++ (int)
 		{
 			sequence_iterator _output = *this;
 
@@ -481,7 +481,7 @@ namespace dt0
 			return _output;
 		}
 
-		sequence_iterator operator-- (int)
+		___constexpr20___ sequence_iterator operator-- (int)
 		{
 			sequence_iterator _output = *this;
 
@@ -490,7 +490,7 @@ namespace dt0
 			return _output;
 		}
 
-		const sequence_iterator& operator+ (const size_type offset)
+		___constexpr20___ const sequence_iterator& operator+ (const size_type offset)
 		{
 			for (size_type i = 0; i < offset; ++i)
 				++(*this);
@@ -498,7 +498,7 @@ namespace dt0
 			return *this;
 		}
 
-		const sequence_iterator& operator- (const size_type offset)
+		___constexpr20___ const sequence_iterator& operator- (const size_type offset)
 		{
 			for (size_type i = 0; i < offset; ++i)
 				--(*this);
@@ -603,7 +603,7 @@ namespace dt0
 		}
 
 		/* Initializer list assignment */
-		const sequence& operator= (std::initializer_list<value_type> initializer_array)
+		___constexpr20___ const sequence& operator= (std::initializer_list<value_type> initializer_array)
 		{
 			if (!this->empty())
 			{
@@ -817,7 +817,7 @@ namespace dt0
 		}
 
 		/* Copy assignment */
-		const sequence& operator= (const sequence& other)
+		___constexpr20___ const sequence& operator= (const sequence& other)
 		{
 			if (this == __builtin_addressof(other))
 				return *this;
@@ -865,7 +865,7 @@ namespace dt0
 		}
 
 		/* Move assignment */
-		const sequence& operator= (sequence&& other) noexcept(false)
+		___constexpr20___ const sequence& operator= (sequence&& other) noexcept(false)
 		{
 			if (this == __builtin_addressof(other))
 				return *this;
@@ -916,7 +916,7 @@ namespace dt0
 
 		/* Range assignment */
 		template <typename range_type>
-		const sequence& operator= (range_type other)
+		___constexpr20___ const sequence& operator= (range_type other)
 		{
 			if (reinterpret_cast<generic_pointer>(this) == reinterpret_cast<generic_pointer>(__builtin_addressof(other)))
 				return *this;
@@ -964,7 +964,7 @@ namespace dt0
 		}
 
 		/* Destructor */
-		~sequence() noexcept(false)
+		___constexpr20___ ~sequence() noexcept(false)
 		{
 			try
 			{
