@@ -490,18 +490,108 @@ namespace dt0
 			return _output;
 		}
 
-		___constexpr20___ const sequence_iterator& operator+ (const size_type offset)
+		___nodiscard___ ___constexpr20___ sequence_iterator operator+ (const size_type offset) const
 		{
-			for (size_type i = 0; i < offset; ++i)
-				++(*this);
+			value_pointer value_position = nullptr;
+			module_pointer module_address = _core._modules_iterator;
+
+			value_position = (_core._values_iterator + offset);
+
+			if (static_cast<size_type>((value_position + 1)-_core._modules_iterator->_begin) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
+			{
+				if (_core._modules_iterator->_successor == nullptr)
+					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
+
+				else
+				{
+					module_address = _core._modules_iterator->_successor;
+
+					size_type difference = (offset - static_cast<size_type>(_core._modules_iterator->_end - _core._values_iterator));
+
+					value_position = (module_address->_begin + difference);
+				}
+			}
+
+			return sequence_iterator(module_address, value_position);
+		}
+
+		___nodiscard___ ___constexpr20___ sequence_iterator operator- (const size_type offset) const
+		{
+			value_pointer value_position = nullptr;
+			module_pointer module_address = _core._modules_iterator;
+
+			value_position = (_core._values_iterator - offset);
+
+			if (static_cast<size_type>((_core._modules_iterator->_end - 1) - (value_position - 1)) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
+			{
+				if (_core._modules_iterator->_antecessor == nullptr)
+					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
+
+				else
+				{
+					module_address = _core._modules_iterator->_antecessor;
+
+					size_type difference = (offset - static_cast<size_type>(_core._values_iterator - (_core._modules_iterator->_begin - 1)));
+
+					value_position = ((module_address->_end - 1) - difference);
+				}
+			}
+
+			return sequence_iterator(module_address, value_position);
+		}
+
+		___constexpr20___ const sequence_iterator& operator+= (const size_type offset)
+		{
+			value_pointer value_position = nullptr;
+			module_pointer module_address = _core._modules_iterator;
+
+			value_position = (_core._values_iterator + offset);
+
+			if (static_cast<size_type>((value_position + 1) - _core._modules_iterator->_begin) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
+			{
+				if (_core._modules_iterator->_successor == nullptr)
+					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
+
+				else
+				{
+					module_address = _core._modules_iterator->_successor;
+
+					size_type difference = (offset - static_cast<size_type>(_core._modules_iterator->_end - _core._values_iterator));
+
+					value_position = (module_address->_begin + difference);
+				}
+			}
+
+			_core._values_iterator = value_position;
+			_core._modules_iterator = module_address;
 
 			return *this;
 		}
 
-		___constexpr20___ const sequence_iterator& operator- (const size_type offset)
+		___constexpr20___ const sequence_iterator& operator-= (const size_type offset)
 		{
-			for (size_type i = 0; i < offset; ++i)
-				--(*this);
+			value_pointer value_position = nullptr;
+			module_pointer module_address = _core._modules_iterator;
+
+			value_position = (_core._values_iterator - offset);
+
+			if (static_cast<size_type>((_core._modules_iterator->_end - 1) - (value_position - 1)) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
+			{
+				if (_core._modules_iterator->_antecessor == nullptr)
+					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
+
+				else
+				{
+					module_address = _core._modules_iterator->_antecessor;
+
+					size_type difference = (offset - static_cast<size_type>(_core._values_iterator - (_core._modules_iterator->_begin - 1)));
+
+					value_position = ((module_address->_end - 1) - difference);
+				}
+			}
+
+			_core._values_iterator = value_position;
+			_core._modules_iterator = module_address;
 
 			return *this;
 		}
@@ -816,6 +906,24 @@ namespace dt0
 			}
 		}
 
+		/* Constructor which sets heap reserve space capacity */
+		___constexpr20___ sequence(const size_type reserve_capacity)
+		{
+			_heap_module_reserve_capacity = reserve_capacity;
+
+		#ifdef _WIN64
+			try
+			{
+				_core.set_heap();
+			}
+
+			catch (sequence_error _error)
+			{
+				throw;
+			}
+		#endif
+		}
+
 		/* Copy assignment */
 		___constexpr20___ const sequence& operator= (const sequence& other)
 		{
@@ -985,7 +1093,7 @@ namespace dt0
 			{
 				try
 				{
-					_core._front_module = _core.new_module(4ui64, nullptr, nullptr);
+					_core._front_module = _core.new_module(_heap_module_reserve_capacity, nullptr, nullptr);
 				}
 
 				catch (sequence_error _error)
@@ -1077,7 +1185,7 @@ namespace dt0
 
 					try
 					{
-						_core._front_module->_antecessor = _core.new_module(4ui64, nullptr, _core._front_module);
+						_core._front_module->_antecessor = _core.new_module(_heap_module_reserve_capacity, nullptr, _core._front_module);
 					}
 
 					catch (sequence_error _error)
@@ -1129,7 +1237,7 @@ namespace dt0
 			{
 				try
 				{
-					_core._back_module = _core.new_module(4ui64, nullptr, nullptr);
+					_core._back_module = _core.new_module(_heap_module_reserve_capacity, nullptr, nullptr);
 				}
 
 				catch (sequence_error _error)
@@ -1221,7 +1329,7 @@ namespace dt0
 
 					try
 					{
-						_core._back_module->_successor = _core.new_module(4ui64, _core._back_module, nullptr);
+						_core._back_module->_successor = _core.new_module(_heap_module_reserve_capacity, _core._back_module, nullptr);
 					}
 
 					catch (sequence_error _error)
@@ -3206,52 +3314,6 @@ namespace dt0
 			}
 		}
 
-		template <typename C> ___constexpr20___ void _absorb(C _unit, bool _at_front) noexcept(false)
-		{
-			try
-			{
-				this->_compress();
-			}
-
-			catch (sequence_error _error)
-			{
-				throw;
-			}
-
-			try
-			{
-				_unit.shrink_to_fit();
-			}
-
-			catch (sequence_error _error)
-			{
-				throw;
-			}
-
-			if (_at_front == true)
-			{
-				_core._front_module->_antecessor = _unit._core._back_module;
-				_unit._core._back_module->_successor = _core._front_module;
-
-				_core._front = _unit._core._front;
-				_core._front_module = _unit._core._front_module;
-			}
-
-			else
-			{
-				_core._back_module->_successor = _unit._core._front_module;
-				_unit._core._front_module->_antecessor = _core._back_module;
-
-				_core._back = _unit._core._back;
-				_core._back_module = _unit._core._back_module;
-			}
-
-			_unit._core._front_module = nullptr;
-			_unit._core._back_module = nullptr;
-			_unit._core._front = nullptr;
-			_unit._core._back = nullptr;
-		}
-
 	public:
 		___constexpr20___ void push_front(const_lvalue_reference val)
 		{
@@ -3307,6 +3369,21 @@ namespace dt0
 
 		___constexpr20___ iterator insert(iterator left, iterator right, const_lvalue_reference val)
 		{
+			iterator _find_left = this->find(*left);
+			iterator _find_right = this->find(*right);
+
+			if ((_find_left == this->end()) || (_find_right == this->end()))
+			{
+				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+					std::string(">->insert(iterator, iterator, const_lvalue_reference): Invalid iterators provided, no such values exist!"));
+			}
+
+			if ((left + 1) != right)
+			{
+				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+					std::string(">->insert(iterator, iterator, const_lvalue_reference): Invalid iterators provided!"));
+			}
+
 			try
 			{
 				iterator _output = nullptr;
@@ -3338,6 +3415,21 @@ namespace dt0
 
 		___constexpr20___ iterator insert(iterator left, iterator right, rvalue_reference val)
 		{
+			iterator _find_left = this->find(*left);
+			iterator _find_right = this->find(*right);
+
+			if((_find_left == this->end()) || (_find_right == this->end()))
+			{
+				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+					std::string(">->insert(iterator, iterator, rvalue_reference): Invalid iterators provided, no such values exist!"));
+			}
+
+			if ((left + 1) != right)
+			{
+				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+					std::string(">->insert(iterator, iterator, rvalue_reference): Invalid iterators provided!"));
+			}
+
 			try
 			{
 				iterator _output = nullptr;
@@ -3553,10 +3645,12 @@ namespace dt0
 
 		___constexpr20___ void erase(iterator pos)
 		{
-			if ((pos == this->rend()) || (pos == this->end()))
+			iterator _find_out = this->find(*pos);
+
+			if (_find_out == this->end())
 			{
 				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
-					std::string(">->remove(iterator): Invalid iterator povided!"));
+					std::string(">->erase(iterator)->find(const value_type): No such value exists!"));
 			}
 
 			try
@@ -3594,28 +3688,16 @@ namespace dt0
 
 		___nodiscard___ ___constexpr20___ iterator find(const value_type val) const
 		{
-			bool _found = false;
+			iterator _output = this->begin();
 
-			auto _iterator = this->begin();
-
-			while (_iterator != this->end())
+			while (_output != this->end())
 			{
-				if (*_iterator == val)
-				{
-					_found = true;
-					break;
-				}
+				if (*_output == val) break;
 
-				++_iterator;
+				++_output;
 			}
 
-			if (_found != true)
-			{
-				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
-					std::string(">->find(const value_type): No such value exists!"));
-			}
-
-			else return _iterator;
+			return _output;
 		}
 
 		___nodiscard___ ___constexpr20___ iterator begin() const
@@ -3664,7 +3746,7 @@ namespace dt0
 				else
 				{
 					throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
-						std::string(">->capacity(): Successor pointer was null, could not fully calculate capacity!"));
+						std::string(">->capacity(): Successor pointer was null, could not fully calculate size!"));
 				}
 
 				while (_iterator != _core._back_module)
@@ -3677,7 +3759,7 @@ namespace dt0
 					else
 					{
 						throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
-							std::string(">->capacity(): Successor pointer was null, could not fully calculate capacity!"));
+							std::string(">->capacity(): Successor pointer was null, could not fully calculate size!"));
 					}
 				}
 			}
@@ -3776,60 +3858,6 @@ namespace dt0
 			return allocator_type();
 		}
 
-		___constexpr20___ void absorb_front(sequence& other)
-		{
-			try
-			{
-				this->_absorb<sequence&>(other, true);
-				other.~sequence();
-			}
-
-			catch (sequence_error _error)
-			{
-				throw;
-			}
-		}
-
-		___constexpr20___ void absorb_front(sequence&& other) noexcept(false)
-		{
-			try
-			{
-				this->_absorb<sequence&&>(std::move(other), true);
-			}
-
-			catch (sequence_error _error)
-			{
-				throw;
-			}
-		}
-
-		___constexpr20___ void absorb_back(sequence& other)
-		{
-			try
-			{
-				this->_absorb<sequence&>(other, false);
-				other.~sequence();
-			}
-
-			catch (sequence_error _error)
-			{
-				throw;
-			}
-		}
-
-		___constexpr20___ void absorb_back(sequence&& other) noexcept(false)
-		{
-			try
-			{
-				this->_absorb<sequence&&>(std::move(other), false);
-			}
-
-			catch (sequence_error _error)
-			{
-				throw;
-			}
-		}
-
 	private:
 		/* Sequence core values class */
 		class sequence_core
@@ -3852,6 +3880,10 @@ namespace dt0
 
 		/* Cluster unit core */
 		inheritance_pair<allocator_type, sequence_core> _core;
+
+		/* The capacity of the reserved data space of each heap module 
+		(excludes modules that are created or reallocated on insertion) */
+		size_type _heap_module_reserve_capacity = 4ui64;
 	};
 }
 
