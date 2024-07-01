@@ -492,106 +492,36 @@ namespace dt0
 
 		___nodiscard___ ___constexpr20___ sequence_iterator operator+ (const size_type offset) const
 		{
-			value_pointer value_position = nullptr;
-			module_pointer module_address = _core._modules_iterator;
+			sequence_iterator _output = *this;
 
-			value_position = (_core._values_iterator + offset);
+			for (size_type i = 0; i < offset; ++i)
+				++_output;
 
-			if (static_cast<size_type>((value_position + 1)-_core._modules_iterator->_begin) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
-			{
-				if (_core._modules_iterator->_successor == nullptr)
-					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
-
-				else
-				{
-					module_address = _core._modules_iterator->_successor;
-
-					size_type difference = (offset - static_cast<size_type>(_core._modules_iterator->_end - _core._values_iterator));
-
-					value_position = (module_address->_begin + difference);
-				}
-			}
-
-			return sequence_iterator(module_address, value_position);
+			return _output;
 		}
 
 		___nodiscard___ ___constexpr20___ sequence_iterator operator- (const size_type offset) const
 		{
-			value_pointer value_position = nullptr;
-			module_pointer module_address = _core._modules_iterator;
+			sequence_iterator _output = *this;
 
-			value_position = (_core._values_iterator - offset);
+			for (size_type i = 0; i < offset; ++i)
+				--_output;
 
-			if (static_cast<size_type>((_core._modules_iterator->_end - 1) - (value_position - 1)) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
-			{
-				if (_core._modules_iterator->_antecessor == nullptr)
-					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
-
-				else
-				{
-					module_address = _core._modules_iterator->_antecessor;
-
-					size_type difference = (offset - static_cast<size_type>(_core._values_iterator - (_core._modules_iterator->_begin - 1)));
-
-					value_position = ((module_address->_end - 1) - difference);
-				}
-			}
-
-			return sequence_iterator(module_address, value_position);
+			return _output;
 		}
 
 		___constexpr20___ const sequence_iterator& operator+= (const size_type offset)
 		{
-			value_pointer value_position = nullptr;
-			module_pointer module_address = _core._modules_iterator;
-
-			value_position = (_core._values_iterator + offset);
-
-			if (static_cast<size_type>((value_position + 1) - _core._modules_iterator->_begin) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
-			{
-				if (_core._modules_iterator->_successor == nullptr)
-					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
-
-				else
-				{
-					module_address = _core._modules_iterator->_successor;
-
-					size_type difference = (offset - static_cast<size_type>(_core._modules_iterator->_end - _core._values_iterator));
-
-					value_position = (module_address->_begin + difference);
-				}
-			}
-
-			_core._values_iterator = value_position;
-			_core._modules_iterator = module_address;
+			for (size_type i = 0; i < offset; ++i)
+				++(*this);
 
 			return *this;
 		}
 
 		___constexpr20___ const sequence_iterator& operator-= (const size_type offset)
 		{
-			value_pointer value_position = nullptr;
-			module_pointer module_address = _core._modules_iterator;
-
-			value_position = (_core._values_iterator - offset);
-
-			if (static_cast<size_type>((_core._modules_iterator->_end - 1) - (value_position - 1)) > static_cast<size_type>(_core._modules_iterator->_end - _core._modules_iterator->_begin))
-			{
-				if (_core._modules_iterator->_antecessor == nullptr)
-					throw sequence_error("Can not return iterator position, iterator position out of sequence bounds!");
-
-				else
-				{
-					module_address = _core._modules_iterator->_antecessor;
-
-					size_type difference = (offset - static_cast<size_type>(_core._values_iterator - (_core._modules_iterator->_begin - 1)));
-
-					value_position = ((module_address->_end - 1) - difference);
-				}
-			}
-
-			_core._values_iterator = value_position;
-			_core._modules_iterator = module_address;
+			for (size_type i = 0; i < offset; ++i)
+				--(*this);
 
 			return *this;
 		}
@@ -613,6 +543,8 @@ namespace dt0
 		}
 	};
 
+	/* Double-ended container that is a sequence of doubly-linked heap modules 
+	which each have a reserved space for the user data and the heap module manager class */
 	template <typename U, typename A = sequence_allocator<U>>
 	class sequence
 	{
@@ -3488,17 +3420,44 @@ namespace dt0
 		}
 
 		template <typename... Args>
-		___constexpr20___ void emplace(iterator left, iterator right, Args&&... constructor_args)
+		___constexpr20___ iterator emplace(iterator left, iterator right, Args&&... constructor_args)
 		{
+			iterator _find_left = this->find(*left);
+			iterator _find_right = this->find(*right);
+
+			if ((_find_left == this->end()) || (_find_right == this->end()))
+			{
+				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+					std::string(">->emplace(iterator, iterator, Args&&...): Invalid iterators provided, no such values exist!"));
+			}
+
+			if ((left + 1) != right)
+			{
+				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+					std::string(">->emplace(iterator, iterator, Args&&...): Invalid iterators provided!"));
+			}
+
 			try
 			{
+				iterator _output = nullptr;
+
 				if (((left == this->rend()) || (left == this->begin())) && ((right == this->begin()) || (right == this->rend())))
+				{
 					this->_write_to_front<rvalue_reference>(std::move(value_type(std::forward<Args>(constructor_args)...)));
 
+					_output = std::move(this->begin());
+				}
+
 				else if (((left == this->rbegin()) || (left == this->end())) && ((right == this->end()) || (right == this->rbegin())))
+				{
 					this->_write_to_back<rvalue_reference>(std::move(value_type(std::forward<Args>(constructor_args)...)));
 
-				else this->_insert<rvalue_reference>(std::move(left), std::move(right), std::move(value_type(std::forward<Args>(constructor_args)...)));
+					_output = std::move(this->rbegin());
+				}
+
+				else _output = std::move(this->_insert<rvalue_reference>(std::move(left), std::move(right), std::move(value_type(std::forward<Args>(constructor_args)...))));
+
+				return _output;
 			}
 
 			catch (sequence_error _error)
