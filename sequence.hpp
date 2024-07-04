@@ -52,7 +52,7 @@ namespace dt0
 {
 	/* Inheritance pair */
 	template <typename F, typename S, bool conditions = ((std::is_class_v<F>&& std::is_class_v<S>) &&
-							    !(std::is_final_v<F>&& std::is_final_v<S>))>
+														!(std::is_final_v<F>&& std::is_final_v<S>))>
 	class inheritance_pair final : public F, public S
 	{
 	public:
