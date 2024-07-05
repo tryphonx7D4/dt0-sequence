@@ -564,6 +564,12 @@ namespace dt0
 
 		using iterator = sequence_iterator<value_type, module_type>;	// Bidirectional, ++ for forward, -- for reverse iteration
 
+		static const size_type kilobyte = 1'024;
+		static const size_type megabyte = 1'048'576;
+		static const size_type gigabyte = 1'073'741'824;
+
+		static const size_type data_reserve_limit = (gigabyte - sizeof(module_type)); // Per heap module
+
 	public:
 		/* Default constructor */
 		___constexpr20___ sequence() noexcept(false)
@@ -3249,7 +3255,7 @@ namespace dt0
 	public:
 		___constexpr20___ void set_reserve_capacity(const size_type new_capacity)
 		{
-			if ((new_capacity == 0) || (new_capacity > (4096 - sizeof(module_type))))
+			if ((new_capacity == 0) || (new_capacity > data_reserve_limit))
 			{
 				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
 					std::string(">->set_reserve_capacity(const size_type): Invalid heap module data reserve capacity!"));
