@@ -3766,6 +3766,38 @@ namespace dt0
 			return _capacity;
 		}
 
+		___nodiscard___ ___constexpr20___ const size_type module_count() const
+		{
+			size_type _counter = 0;
+
+			module_pointer _iterator = _core._front_module;
+
+			while (_iterator != _core._back_module)
+			{
+				++_counter;
+
+				if (_iterator->_successor != nullptr)
+					_iterator = _iterator->_successor;
+
+				else
+				{
+					throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+						std::string(">->module_count(): Successor pointer was null, could not fully calculate capacity!"));
+				}
+			}
+
+			_counter += 1;
+
+			const size_type _module_count = _counter;
+
+			return _module_count;
+		}
+
+		___nodiscard___ ___constexpr20___ const size_type module_size() const
+		{
+			return (sizeof(module_type) + (_heap_module_reserve_capacity * sizeof(value_type)));
+		}
+
 		___nodiscard___ ___constexpr20___ const_lvalue_reference front() const
 		{
 			return *_core._front;
