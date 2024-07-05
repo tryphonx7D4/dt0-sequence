@@ -52,7 +52,7 @@ namespace dt0
 {
 	/* Inheritance pair */
 	template <typename F, typename S, bool conditions = ((std::is_class_v<F>&& std::is_class_v<S>) &&
-														!(std::is_final_v<F>&& std::is_final_v<S>))>
+							    !(std::is_final_v<F>&& std::is_final_v<S>))>
 	class inheritance_pair final : public F, public S
 	{
 	public:
@@ -3247,6 +3247,17 @@ namespace dt0
 		}
 
 	public:
+		___constexpr20___ void set_reserve_capacity(const size_type new_capacity)
+		{
+			if ((new_capacity == 0) || (new_capacity > (4096 - sizeof(module_type))))
+			{
+				throw sequence_error(std::string("dt0::sequence<") + std::string(typeid(value_type).name()) +
+					std::string(">->set_reserve_capacity(const size_type): Invalid heap module data reserve capacity!"));
+			}
+
+			_heap_module_reserve_capacity = new_capacity;
+		}
+
 		___constexpr20___ void push_front(const_lvalue_reference val)
 		{
 			try
@@ -3815,6 +3826,11 @@ namespace dt0
 		___nodiscard___ ___constexpr20___ allocator_type get_allocator() const
 		{
 			return allocator_type();
+		}
+
+		___nodiscard___ ___constexpr20___ size_type reserve_capacity() const
+		{
+			return _heap_module_reserve_capacity;
 		}
 
 	private:
